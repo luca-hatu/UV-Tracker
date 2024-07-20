@@ -1,9 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const apiKey = 'd5aee4dddc2f3d0a44388c385978d4de';
-    const latitude = 48.8666667; 
-    const longitude = 2.33333; 
 
-    function fetchUVData() {
+    function fetchUVData(latitude, longitude) {
         const currentUVUrl = `http://api.openweathermap.org/data/2.5/uvi?lat=${latitude}&lon=${longitude}&appid=${apiKey}`;
         
         fetch(currentUVUrl)
@@ -47,5 +45,21 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    fetchUVData();
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(position => {
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+                fetchUVData(latitude, longitude);
+            }, error => {
+                console.error('Error getting location:', error);
+                document.getElementById('uv-value').textContent = 'Location Error';
+            });
+        } else {
+            console.error('Geolocation not supported by this browser.');
+            document.getElementById('uv-value').textContent = 'Geolocation Not Supported';
+        }
+    }
+
+    getLocation();
 });
