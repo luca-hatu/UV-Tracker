@@ -2,47 +2,62 @@ document.addEventListener('DOMContentLoaded', function() {
     const apiKey = 'd5aee4dddc2f3d0a44388c385978d4de';
 
     function fetchUVData(latitude, longitude) {
-        const currentUVUrl = `http://api.openweathermap.org/data/2.5/uvi?lat=${latitude}&lon=${longitude}&appid=${apiKey}`;
+        const currentUVUrl = `https://api.openweathermap.org/data/2.5/uvi?lat=${latitude}&lon=${longitude}&appid=${apiKey}`;
         
         fetch(currentUVUrl)
             .then(response => response.json())
             .then(data => {
-                document.getElementById('uv-value').textContent = data.value;
-                displayTips(data.value);
+                const uvValue = data.value;
+                document.querySelector('.uv-value').textContent = uvValue.toFixed(2);
+                updateUVInfo(uvValue);
+                updateCircleIndicator(uvValue);
             })
             .catch(error => {
                 console.error('Error fetching current UV data:', error);
-                document.getElementById('uv-value').textContent = 'Error';
+                document.querySelector('.uv-value').textContent = 'Error';
             });
     }
 
-    function displayTips(uvIndex) {
-        const tipsList = document.getElementById('tips-list');
-        tipsList.innerHTML = ''; 
+    function updateUVInfo(uvIndex) {
+        const uvDescription = document.querySelector('.uv-description');
+        const timeToSunburn = document.querySelector('.time-to-sunburn');
+        const recommendedSpf = document.querySelector('.recommended-spf');
 
-        const tips = [
-            "Wear sunglasses that block 100% of UV rays.",
-            "Use sunscreen with at least SPF 30.",
-            "Seek shade during midday hours.",
-            "Wear protective clothing and a wide-brimmed hat.",
-            "Be aware of surfaces that reflect UV rays, like sand and water."
-        ];
+        let uvLevelText = '';
+        let timeToBurn = '';
+        let spf = '';
 
-        if (uvIndex >= 3 && uvIndex <= 5) {
-            tips.push("Moderate UV Index: Consider wearing sunscreen and protective clothing.");
-        } else if (uvIndex >= 6 && uvIndex <= 7) {
-            tips.push("High UV Index: Wear sunscreen, protective clothing, and stay in the shade if possible.");
-        } else if (uvIndex >= 8 && uvIndex <= 10) {
-            tips.push("Very High UV Index: Take extra precautions as unprotected skin and eyes can burn quickly.");
-        } else if (uvIndex >= 11) {
-            tips.push("Extreme UV Index: Avoid being outside during midday hours. Wear protective clothing and use a high SPF sunscreen.");
+        if (uvIndex <= 2) {
+            uvLevelText = 'LOW';
+            timeToBurn = '60 min';
+            spf = '10 SPF';
+        } else if (uvIndex <= 5) {
+            uvLevelText = 'MODERATE';
+            timeToBurn = '45 min';
+            spf = '15 SPF';
+        } else if (uvIndex <= 7) {
+            uvLevelText = 'HIGH';
+            timeToBurn = '25 min';
+            spf = '30 SPF';
+        } else if (uvIndex <= 10) {
+            uvLevelText = 'VERY HIGH';
+            timeToBurn = '10 min';
+            spf = '50 SPF';
+        } else {
+            uvLevelText = 'EXTREME';
+            timeToBurn = '5 min';
+            spf = '50+ SPF';
         }
 
-        tips.forEach(tip => {
-            const listItem = document.createElement('li');
-            listItem.textContent = tip;
-            tipsList.appendChild(listItem);
-        });
+        document.querySelector('.uv-description').textContent = `${uvLevelText} UV Index`;
+        document.querySelector('.time-to-sunburn').textContent = `Time to sunburn: ${timeToBurn}`;
+        document.querySelector('.recommended-spf').textContent = `Recommended SPF: ${spf}`;
+        document.querySelector('.uv-level').textContent = `${uvLevelText} UV Index`;
+    }
+
+    function updateCircleIndicator(uvIndex) {
+        const rotation = (Math.min(uvIndex, 11) / 11) * 360; 
+        document.querySelector('.circle-indicator').style.transform = `rotate(${rotation}deg)`;
     }
 
     function getLocation() {
@@ -53,11 +68,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 fetchUVData(latitude, longitude);
             }, error => {
                 console.error('Error getting location:', error);
-                document.getElementById('uv-value').textContent = 'Location Error';
+                document.querySelector('.uv-value').textContent = 'Location Error';
             });
         } else {
             console.error('Geolocation not supported by this browser.');
-            document.getElementById('uv-value').textContent = 'Geolocation Not Supported';
+            document.querySelector('.uv-value').textContent = 'Geolocation Not Supported';
         }
     }
 

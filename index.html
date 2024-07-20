@@ -11,19 +11,28 @@
         <h1>UV Tracker</h1>
     </header>
     <main>
-        <section id="current-uv">
-            <h2>Current UV Index</h2>
-            <div id="uv-value">Loading...</div>
-        </section>
-        <section id="uv-tips">
-            <h2>UV Protection Tips</h2>
-            <ul id="tips-list">
-            </ul>
+        <section class="tiles">
+            <article class="uv-tile main-tile">
+                <div class="circle-bg"></div>
+                <div class="circle-indicator"></div>
+                <div class="uv-value-container">
+                    <div class="uv-value">0</div>
+                    <div class="uv-description">LOW UV Index</div>
+                </div>
+            </article>
+            <article class="uv-tile uv-level-tile">
+                <div class="uv-level">LOW UV Index</div>
+            </article>
+            <div class="sub-tiles">
+                <article class="uv-tile sunburn-tile">
+                    <div class="time-to-sunburn">Time to sunburn: 60 min</div>
+                </article>
+                <article class="uv-tile spf-tile">
+                    <div class="recommended-spf">Recommended SPF: 10 SPF</div>
+                </article>
+            </div>
         </section>
     </main>
-    <footer>
-        <p>&copy; 2024 UV Tracker</p>
-    </footer>
     <script src="scripts.js"></script>
 </body>
 </html>
