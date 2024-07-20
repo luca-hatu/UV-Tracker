@@ -7,7 +7,7 @@ body {
 }
 
 header {
-    background-color: #e29001;
+    background-color: #f7b307;
     color: white;
     text-align: center;
     padding: 1em 0;
@@ -26,7 +26,7 @@ section {
 }
 
 h2 {
-    border-bottom: 2px solid #e29001;
+    border-bottom: 2px solid #f7b307;
     padding-bottom: 0.5em;
 }
 
@@ -35,12 +35,13 @@ h2 {
     text-align: center;
 }
 
-#forecast-list {
+#tips-list {
     list-style: none;
     padding: 0;
 }
 
-#forecast-list li {
+#tips-list li {
     padding: 0.5em 0;
     border-bottom: 1px solid #ddd;
 }
+
