@@ -3,7 +3,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const geocodingApiKey = apiKey;
     const locationIcon = document.getElementById('location-icon');
     const modal = document.getElementById('location-modal');
+    const preferencesModal = document.getElementById('preferences-modal');
     const closeModal = document.querySelector('.close');
+    const preferencesBtn = document.getElementById('preferences-btn');
     const currentLocationElement = document.getElementById('current-location');
 
     function fetchUVData(latitude, longitude) {
@@ -35,21 +37,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.daily) {
                     const daily = data.daily;
                     let forecastHtml = '<ul>';
+                    let detailedForecastHtml = '<ul>';
                     daily.forEach((day, index) => {
-                        if (index === 0) return;
+                        if (index === 0) return; 
                         const uvIndex = day.uvi;
                         const date = new Date(day.dt * 1000).toLocaleDateString();
                         forecastHtml += `<li>${date}: UV Index ${uvIndex.toFixed(2)}</li>`;
+                        detailedForecastHtml += `
+                            <li>
+                                <strong>${date}</strong>: 
+                                UV Index ${uvIndex.toFixed(2)}
+                                <div>Max Temp: ${day.temp.max}°C</div>
+                                <div>Min Temp: ${day.temp.min}°C</div>
+                            </li>`;
                     });
                     forecastHtml += '</ul>';
+                    detailedForecastHtml += '</ul>';
                     document.getElementById('forecast-uv').innerHTML = forecastHtml;
+                    document.getElementById('forecast-details').innerHTML = detailedForecastHtml;
                 } else {
                     document.getElementById('forecast-uv').textContent = 'No forecast data available';
+                    document.getElementById('forecast-details').textContent = 'No detailed forecast data available';
                 }
             })
             .catch(error => {
                 console.error('Error fetching UV forecast data:', error);
                 document.getElementById('forecast-uv').textContent = 'Error fetching forecast data';
+                document.getElementById('forecast-details').textContent = 'Error fetching detailed forecast data';
             });
     }
 
@@ -58,35 +72,32 @@ document.addEventListener('DOMContentLoaded', function() {
         const timeToSunburn = document.querySelector('.time-to-sunburn');
         const recommendedSpf = document.querySelector('.recommended-spf');
 
+        const { spf } = getUserPreferences();
+
         let uvLevelText = '';
         let timeToBurn = '';
-        let spf = '';
-
+        
         if (uvIndex <= 2) {
             uvLevelText = 'LOW';
             timeToBurn = '60 min';
-            spf = '10 SPF';
         } else if (uvIndex <= 5) {
             uvLevelText = 'MODERATE';
             timeToBurn = '45 min';
-            spf = '15 SPF';
         } else if (uvIndex <= 7) {
             uvLevelText = 'HIGH';
             timeToBurn = '25 min';
-            spf = '30 SPF';
         } else if (uvIndex <= 10) {
             uvLevelText = 'VERY HIGH';
             timeToBurn = '10 min';
-            spf = '50 SPF';
         } else {
             uvLevelText = 'EXTREME';
             timeToBurn = '5 min';
-            spf = '50+ SPF';
         }
 
         uvDescription.textContent = `${uvLevelText} UV Index`;
         timeToSunburn.textContent = `Time to sunburn: ${timeToBurn}`;
-        recommendedSpf.textContent = `Recommended SPF: ${spf}`;
+        recommendedSpf.textContent = `Recommended SPF: ${spf} SPF`;
+
         document.querySelector('.uv-level').textContent = `${uvLevelText} UV Index`;
     }
 
@@ -104,73 +115,87 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentLocationElement.textContent = `Current Location: ${latitude.toFixed(2)}, ${longitude.toFixed(2)}`;
             }, error => {
                 console.error('Error getting location:', error);
-                document.querySelector('.uv-value').textContent = 'Location Error';
+                currentLocationElement.textContent = 'Location Error';
             });
         } else {
             console.error('Geolocation not supported by this browser.');
-            document.querySelector('.uv-value').textContent = 'Geolocation Not Supported';
+            currentLocationElement.textContent = 'Geolocation Not Supported';
         }
     }
 
-    function loadStoredLocation() {
-        const storedLatitude = localStorage.getItem('latitude');
-        const storedLongitude = localStorage.getItem('longitude');
-        if (storedLatitude && storedLongitude) {
-            fetchUVData(storedLatitude, storedLongitude);
-        } else {
-            getLocation();
-        }
-    }
-
-    function fetchCoordinates(locationName) {
-        const geocodeUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${locationName}&limit=1&appid=${geocodingApiKey}`;
-
+    function fetchLocationData(locationName) {
+        const geocodeUrl = `https://api.openweathermap.org/data/2.5/weather?q=${locationName}&appid=${geocodingApiKey}`;
+        
         fetch(geocodeUrl)
             .then(response => response.json())
             .then(data => {
-                if (data.length > 0) {
-                    const { lat, lon } = data[0];
-                    localStorage.setItem('latitude', lat);
-                    localStorage.setItem('longitude', lon);
-                    fetchUVData(lat, lon);
-                    modal.style.display = 'none';
+                if (data.coord) {
+                    const latitude = data.coord.lat;
+                    const longitude = data.coord.lon;
+                    fetchUVData(latitude, longitude);
                 } else {
-                    alert('Location not found. Please enter a valid location name.');
+                    console.error('No coordinates found for this location.');
                 }
             })
             .catch(error => {
-                console.error('Error fetching coordinates:', error);
-                alert('Error fetching coordinates. Please try again.');
+                console.error('Error fetching location data:', error);
+                currentLocationElement.textContent = 'Error fetching location data';
             });
     }
 
-    locationIcon.addEventListener('click', function() {
-        modal.style.display = 'block';
+    function saveLocation(locationName) {
+        localStorage.setItem('savedLocation', locationName);
+    }
+
+    function loadSavedLocation() {
+        const savedLocation = localStorage.getItem('savedLocation');
+        if (savedLocation) {
+            fetchLocationData(savedLocation);
+        }
+    }
+
+    function getUserPreferences() {
+        const spf = localStorage.getItem('preferred-spf') || '30';
+        const darkMode = localStorage.getItem('dark-mode') === 'true';
+        return { spf, darkMode };
+    }
+
+    function setUserPreferences(preferences) {
+        localStorage.setItem('preferred-spf', preferences.spf);
+        localStorage.setItem('dark-mode', preferences.darkMode);
+    }
+
+    function applyTheme() {
+        const { darkMode } = getUserPreferences();
+        if (darkMode) {
+            document.body.classList.add('dark-mode');
+            document.getElementById('theme-toggle').checked = true;
+        } else {
+            document.body.classList.remove('dark-mode');
+            document.getElementById('theme-toggle').checked = false;
+        }
+    }
+
+    preferencesBtn.addEventListener('click', function() {
+        const { spf, darkMode } = getUserPreferences();
+        document.getElementById('preferred-spf').value = spf;
+        document.getElementById('theme-toggle').checked = darkMode;
+        preferencesModal.style.display = 'block';
     });
 
     closeModal.addEventListener('click', function() {
-        modal.style.display = 'none';
+        preferencesModal.style.display = 'none';
     });
 
-    window.addEventListener('click', function(event) {
-        if (event.target === modal) {
-            modal.style.display = 'none';
-        }
+    document.getElementById('preferences-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const spf = document.getElementById('preferred-spf').value;
+        const darkMode = document.getElementById('theme-toggle').checked;
+        setUserPreferences({ spf, darkMode });
+        applyTheme();
+        preferencesModal.style.display = 'none';
     });
 
-    document.getElementById('fetch-location-name').addEventListener('click', function() {
-        const locationName = document.getElementById('location-name').value;
-        if (locationName) {
-            fetchCoordinates(locationName);
-        } else {
-            alert('Please enter a location name.');
-        }
-    });
-
-    document.getElementById('use-current-position').addEventListener('click', function() {
-        getLocation();
-        modal.style.display = 'none';
-    });
-
-    loadStoredLocation();
+    applyTheme();
+    loadSavedLocation();
 });

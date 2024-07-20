@@ -5,59 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UV Tracker</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
     <header>
         <h1>UV Tracker</h1>
-        <div class="location-icon" id="location-icon">
-            <i class="fas fa-map-marker-alt"></i>
-        </div>
+        <img src="location_icon.png" id="location-icon" alt="Location Icon" style="cursor:pointer; float: right;">
+        <button id="preferences-btn">Preferences</button>
+        <div id="current-location"></div>
     </header>
     <main>
-        <section class="tiles">
-            <article class="uv-tile main-tile">
+        <div class="tiles">
+            <div class="uv-tile main-tile">
                 <div class="circle-bg"></div>
                 <div class="circle-indicator"></div>
                 <div class="uv-value-container">
                     <div class="uv-value">0</div>
                     <div class="uv-description">LOW UV Index</div>
                 </div>
-            </article>
-            <article class="uv-tile uv-level-tile">
+            </div>
+            <div class="uv-tile uv-level-tile">
                 <div class="uv-level">LOW UV Index</div>
-            </article>
+            </div>
             <div class="sub-tiles">
-                <article class="uv-tile sunburn-tile">
+                <div class="uv-tile sunburn-tile">
                     <div class="time-to-sunburn">Time to sunburn: 60 min</div>
-                </article>
-                <article class="uv-tile spf-tile">
+                </div>
+                <div class="uv-tile spf-tile">
                     <div class="recommended-spf">Recommended SPF: 10 SPF</div>
-                </article>
+                </div>
             </div>
-        </section>
-        <section class="historical-forecast">
-            <h2>UV Index Forecast</h2>
-            <div class="forecast-data">
-                <div id="forecast-uv"></div>
+            <div id="forecast-uv" class="uv-tile">
+                <h3>UV Index Forecast</h3>
             </div>
-        </section>
+        </div>
     </main>
-    <div id="location-modal" class="modal">
+    <div id="preferences-modal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h2>Enter Location</h2>
-            <div class="current-location">
-                <p id="current-location">Current Location: </p>
-            </div>
-            <input type="text" id="location-name" placeholder="Enter location name">
-            <button id="fetch-location-name">Search by City</button>
-            <button id="use-current-position">Use Current Position</button>
+            <h2>Preferences</h2>
+            <form id="preferences-form">
+                <label for="preferred-spf">Preferred SPF:</label>
+                <input type="number" id="preferred-spf" min="10" max="100">
+                <br>
+                <label for="theme-toggle">Dark Mode:</label>
+                <input type="checkbox" id="theme-toggle">
+                <br>
+                <button type="submit">Save Preferences</button>
+            </form>
         </div>
     </div>
+
     <script src="scripts.js"></script>
 </body>
 </html>
+
 
 
 
