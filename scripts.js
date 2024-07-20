@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const apiKey = 'd5aee4dddc2f3d0a44388c385978d4de';
+    const geocodingApiKey = apiKey; 
     const locationIcon = document.getElementById('location-icon');
     const modal = document.getElementById('location-modal');
     const closeModal = document.querySelector('.close');
@@ -92,6 +93,28 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    function fetchCoordinates(locationName) {
+        const geocodeUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${locationName}&limit=1&appid=${geocodingApiKey}`;
+
+        fetch(geocodeUrl)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length > 0) {
+                    const { lat, lon } = data[0];
+                    localStorage.setItem('latitude', lat);
+                    localStorage.setItem('longitude', lon);
+                    fetchUVData(lat, lon);
+                    modal.style.display = 'none';
+                } else {
+                    alert('Location not found. Please enter a valid location name.');
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching coordinates:', error);
+                alert('Error fetching coordinates. Please try again.');
+            });
+    }
+
     locationIcon.addEventListener('click', function() {
         modal.style.display = 'block';
     });
@@ -106,17 +129,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    document.getElementById('fetch-manual-location').addEventListener('click', function() {
-        const latitude = parseFloat(document.getElementById('latitude').value);
-        const longitude = parseFloat(document.getElementById('longitude').value);
-        if (!isNaN(latitude) && !isNaN(longitude)) {
-            localStorage.setItem('latitude', latitude);
-            localStorage.setItem('longitude', longitude);
-            fetchUVData(latitude, longitude);
-            modal.style.display = 'none';
+    document.getElementById('fetch-location-name').addEventListener('click', function() {
+        const locationName = document.getElementById('location-name').value;
+        if (locationName) {
+            fetchCoordinates(locationName);
         } else {
-            alert('Please enter valid latitude and longitude.');
+            alert('Please enter a location name.');
         }
+    });
+
+    document.getElementById('use-current-position').addEventListener('click', function() {
+        getLocation();
+        modal.style.display = 'none';
     });
 
     loadStoredLocation();
