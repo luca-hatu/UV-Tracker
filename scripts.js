@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const apiKey = 'd5aee4dddc2f3d0a44388c385978d4de';
-    const geocodingApiKey = apiKey; 
+    const geocodingApiKey = apiKey;
     const locationIcon = document.getElementById('location-icon');
     const modal = document.getElementById('location-modal');
     const closeModal = document.querySelector('.close');
@@ -20,6 +20,36 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => {
                 console.error('Error fetching current UV data:', error);
                 document.querySelector('.uv-value').textContent = 'Error';
+            });
+
+        fetchUVForecast(latitude, longitude);
+    }
+
+    function fetchUVForecast(latitude, longitude) {
+        const forecastUVUrl = `https://api.openweathermap.org/data/2.5/onecall?lat=${latitude}&lon=${longitude}&exclude=current,minutely,hourly,alerts&appid=${apiKey}`;
+
+        fetch(forecastUVUrl)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Forecast data:', data);
+                if (data.daily) {
+                    const daily = data.daily;
+                    let forecastHtml = '<ul>';
+                    daily.forEach((day, index) => {
+                        if (index === 0) return;
+                        const uvIndex = day.uvi;
+                        const date = new Date(day.dt * 1000).toLocaleDateString();
+                        forecastHtml += `<li>${date}: UV Index ${uvIndex.toFixed(2)}</li>`;
+                    });
+                    forecastHtml += '</ul>';
+                    document.getElementById('forecast-uv').innerHTML = forecastHtml;
+                } else {
+                    document.getElementById('forecast-uv').textContent = 'No forecast data available';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching UV forecast data:', error);
+                document.getElementById('forecast-uv').textContent = 'Error fetching forecast data';
             });
     }
 
@@ -57,7 +87,6 @@ document.addEventListener('DOMContentLoaded', function() {
         uvDescription.textContent = `${uvLevelText} UV Index`;
         timeToSunburn.textContent = `Time to sunburn: ${timeToBurn}`;
         recommendedSpf.textContent = `Recommended SPF: ${spf}`;
-
         document.querySelector('.uv-level').textContent = `${uvLevelText} UV Index`;
     }
 

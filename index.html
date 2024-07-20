@@ -36,6 +36,12 @@
                 </article>
             </div>
         </section>
+        <section class="historical-forecast">
+            <h2>UV Index Forecast</h2>
+            <div class="forecast-data">
+                <div id="forecast-uv"></div>
+            </div>
+        </section>
     </main>
     <div id="location-modal" class="modal">
         <div class="modal-content">
@@ -45,15 +51,14 @@
                 <p id="current-location">Current Location: </p>
             </div>
             <input type="text" id="location-name" placeholder="Enter location name">
-            <button id="fetch-location-name">Fetch UV Data by Name</button>
+            <button id="fetch-location-name">Search by City</button>
             <button id="use-current-position">Use Current Position</button>
-            <input type="text" id="latitude" placeholder="Latitude" hidden>
-            <input type="text" id="longitude" placeholder="Longitude" hidden>
         </div>
     </div>
     <script src="scripts.js"></script>
 </body>
 </html>
+
 
 
 
