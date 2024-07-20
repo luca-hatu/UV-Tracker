@@ -1,0 +1,46 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+header {
+    background-color: #e29001;
+    color: white;
+    text-align: center;
+    padding: 1em 0;
+}
+
+main {
+    padding: 1em;
+}
+
+section {
+    margin: 1em 0;
+    padding: 1em;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    border-bottom: 2px solid #e29001;
+    padding-bottom: 0.5em;
+}
+
+#uv-value {
+    font-size: 2em;
+    text-align: center;
+}
+
+#forecast-list {
+    list-style: none;
+    padding: 0;
+}
+
+#forecast-list li {
+    padding: 0.5em 0;
+    border-bottom: 1px solid #ddd;
+}
