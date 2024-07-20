@@ -5,10 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UV Tracker</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
     <header>
         <h1>UV Tracker</h1>
+        <div class="location-icon" id="location-icon">
+            <i class="fas fa-map-marker-alt"></i>
+        </div>
     </header>
     <main>
         <section class="tiles">
@@ -33,6 +37,18 @@
             </div>
         </section>
     </main>
+    <div id="location-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Enter Location</h2>
+            <div class="current-location">
+                <p id="current-location">Current Location: </p>
+            </div>
+            <input type="text" id="latitude" placeholder="Latitude">
+            <input type="text" id="longitude" placeholder="Longitude">
+            <button id="fetch-manual-location">Fetch UV Data</button>
+        </div>
+    </div>
     <script src="scripts.js"></script>
 </body>
 </html>

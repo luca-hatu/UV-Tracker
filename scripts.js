@@ -1,5 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
     const apiKey = 'd5aee4dddc2f3d0a44388c385978d4de';
+    const locationIcon = document.getElementById('location-icon');
+    const modal = document.getElementById('location-modal');
+    const closeModal = document.querySelector('.close');
+    const currentLocationElement = document.getElementById('current-location');
 
     function fetchUVData(latitude, longitude) {
         const currentUVUrl = `https://api.openweathermap.org/data/2.5/uvi?lat=${latitude}&lon=${longitude}&appid=${apiKey}`;
@@ -49,9 +53,10 @@ document.addEventListener('DOMContentLoaded', function() {
             spf = '50+ SPF';
         }
 
-        document.querySelector('.uv-description').textContent = `${uvLevelText} UV Index`;
-        document.querySelector('.time-to-sunburn').textContent = `Time to sunburn: ${timeToBurn}`;
-        document.querySelector('.recommended-spf').textContent = `Recommended SPF: ${spf}`;
+        uvDescription.textContent = `${uvLevelText} UV Index`;
+        timeToSunburn.textContent = `Time to sunburn: ${timeToBurn}`;
+        recommendedSpf.textContent = `Recommended SPF: ${spf}`;
+
         document.querySelector('.uv-level').textContent = `${uvLevelText} UV Index`;
     }
 
@@ -66,6 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const latitude = position.coords.latitude;
                 const longitude = position.coords.longitude;
                 fetchUVData(latitude, longitude);
+                currentLocationElement.textContent = `Current Location: ${latitude.toFixed(2)}, ${longitude.toFixed(2)}`;
             }, error => {
                 console.error('Error getting location:', error);
                 document.querySelector('.uv-value').textContent = 'Location Error';
@@ -76,5 +82,42 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    getLocation();
+    function loadStoredLocation() {
+        const storedLatitude = localStorage.getItem('latitude');
+        const storedLongitude = localStorage.getItem('longitude');
+        if (storedLatitude && storedLongitude) {
+            fetchUVData(storedLatitude, storedLongitude);
+        } else {
+            getLocation();
+        }
+    }
+
+    locationIcon.addEventListener('click', function() {
+        modal.style.display = 'block';
+    });
+
+    closeModal.addEventListener('click', function() {
+        modal.style.display = 'none';
+    });
+
+    window.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    document.getElementById('fetch-manual-location').addEventListener('click', function() {
+        const latitude = parseFloat(document.getElementById('latitude').value);
+        const longitude = parseFloat(document.getElementById('longitude').value);
+        if (!isNaN(latitude) && !isNaN(longitude)) {
+            localStorage.setItem('latitude', latitude);
+            localStorage.setItem('longitude', longitude);
+            fetchUVData(latitude, longitude);
+            modal.style.display = 'none';
+        } else {
+            alert('Please enter valid latitude and longitude.');
+        }
+    });
+
+    loadStoredLocation();
 });
