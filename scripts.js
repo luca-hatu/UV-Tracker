@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const currentLocationElement = document.getElementById('current-location');
     const darkModeToggle = document.getElementById('theme-toggle');
     const body = document.body;
+    
 
     function fetchUVData(latitude, longitude) {
         const currentUVUrl = `https://api.openweathermap.org/data/2.5/uvi?lat=${latitude}&lon=${longitude}&appid=${apiKey}`;
