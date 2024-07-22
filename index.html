@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UV Tracker</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <header>
         <h1>UV Tracker</h1>
-        <img src="location_icon.png" id="location-icon" alt="Location Icon" style="cursor:pointer; float: right;">
-        <button id="preferences-btn">Preferences</button>
+        <i class="fas fa-map-marker-alt" id="location-icon"></i>
+        <button id="preferences-btn"><i class="fas fa-cog"></i></button>
         <div id="current-location"></div>
     </header>
     <main>
@@ -39,7 +40,7 @@
             </div>
         </div>
     </main>
-    <div id="preferences-modal" class="modal">
+    <div id="preferences-modal" class="modal hidden">
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2>Preferences</h2>
@@ -54,10 +55,24 @@
             </form>
         </div>
     </div>
-
+    <div id="location-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Enter Location</h2>
+            <input type="text" id="location-name" placeholder="Enter city name">
+            <button id="fetch-location-name">Fetch UV Data</button>
+            <button id="use-current-position">Use Current Position</button>
+            <hr>
+            <h2>Or Enter Coordinates</h2>
+            <input type="number" id="latitude" placeholder="Latitude" step="any">
+            <input type="number" id="longitude" placeholder="Longitude" step="any">
+            <button id="fetch-manual-location">Fetch UV Data by Coordinates</button>
+        </div>
+    </div>
     <script src="scripts.js"></script>
 </body>
 </html>
+
 
 
 

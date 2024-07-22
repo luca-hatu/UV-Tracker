@@ -1,12 +1,13 @@
 document.addEventListener('DOMContentLoaded', function() {
     const apiKey = 'd5aee4dddc2f3d0a44388c385978d4de';
-    const geocodingApiKey = apiKey;
     const locationIcon = document.getElementById('location-icon');
-    const modal = document.getElementById('location-modal');
+    const locationModal = document.getElementById('location-modal');
     const preferencesModal = document.getElementById('preferences-modal');
-    const closeModal = document.querySelector('.close');
+    const closeModals = document.querySelectorAll('.close');
     const preferencesBtn = document.getElementById('preferences-btn');
     const currentLocationElement = document.getElementById('current-location');
+    const darkModeToggle = document.getElementById('theme-toggle');
+    const body = document.body;
 
     function fetchUVData(latitude, longitude) {
         const currentUVUrl = `https://api.openweathermap.org/data/2.5/uvi?lat=${latitude}&lon=${longitude}&appid=${apiKey}`;
@@ -123,79 +124,111 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function fetchLocationData(locationName) {
-        const geocodeUrl = `https://api.openweathermap.org/data/2.5/weather?q=${locationName}&appid=${geocodingApiKey}`;
-        
+    function fetchCoordinates(locationName) {
+        const geocodeUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${locationName}&limit=1&appid=${apiKey}`;
+
         fetch(geocodeUrl)
             .then(response => response.json())
             .then(data => {
-                if (data.coord) {
-                    const latitude = data.coord.lat;
-                    const longitude = data.coord.lon;
-                    fetchUVData(latitude, longitude);
+                if (data.length > 0) {
+                    const { lat, lon } = data[0];
+                    localStorage.setItem('latitude', lat);
+                    localStorage.setItem('longitude', lon);
+                    fetchUVData(lat, lon);
+                    locationModal.style.display = 'none';
                 } else {
-                    console.error('No coordinates found for this location.');
+                    alert('Location not found. Please enter a valid location name.');
                 }
             })
             .catch(error => {
-                console.error('Error fetching location data:', error);
-                currentLocationElement.textContent = 'Error fetching location data';
+                console.error('Error fetching coordinates:', error);
+                alert('Error fetching coordinates. Please try again.');
             });
     }
 
-    function saveLocation(locationName) {
-        localStorage.setItem('savedLocation', locationName);
+    function loadStoredLocation() {
+        const latitude = localStorage.getItem('latitude');
+        const longitude = localStorage.getItem('longitude');
+        if (latitude && longitude) {
+            fetchUVData(latitude, longitude);
+            currentLocationElement.textContent = `Stored Location: ${latitude}, ${longitude}`;
+        } else {
+            getLocation(); 
+        }
     }
 
-    function loadSavedLocation() {
-        const savedLocation = localStorage.getItem('savedLocation');
-        if (savedLocation) {
-            fetchLocationData(savedLocation);
+    function toggleDarkMode(isDarkMode) {
+        if (isDarkMode) {
+            body.classList.add('dark-mode');
+        } else {
+            body.classList.remove('dark-mode');
         }
     }
 
     function getUserPreferences() {
-        const spf = localStorage.getItem('preferred-spf') || '30';
-        const darkMode = localStorage.getItem('dark-mode') === 'true';
-        return { spf, darkMode };
+        const storedSpf = localStorage.getItem('preferred-spf') || '30';
+        const isDarkMode = localStorage.getItem('dark-mode') === 'true';
+        darkModeToggle.checked = isDarkMode;
+        return { spf: storedSpf };
     }
 
-    function setUserPreferences(preferences) {
-        localStorage.setItem('preferred-spf', preferences.spf);
-        localStorage.setItem('dark-mode', preferences.darkMode);
-    }
-
-    function applyTheme() {
-        const { darkMode } = getUserPreferences();
-        if (darkMode) {
-            document.body.classList.add('dark-mode');
-            document.getElementById('theme-toggle').checked = true;
-        } else {
-            document.body.classList.remove('dark-mode');
-            document.getElementById('theme-toggle').checked = false;
-        }
-    }
+    darkModeToggle.addEventListener('change', function() {
+        const isDarkMode = darkModeToggle.checked;
+        localStorage.setItem('dark-mode', isDarkMode);
+        toggleDarkMode(isDarkMode);
+    });
 
     preferencesBtn.addEventListener('click', function() {
-        const { spf, darkMode } = getUserPreferences();
-        document.getElementById('preferred-spf').value = spf;
-        document.getElementById('theme-toggle').checked = darkMode;
         preferencesModal.style.display = 'block';
     });
 
-    closeModal.addEventListener('click', function() {
-        preferencesModal.style.display = 'none';
+    locationIcon.addEventListener('click', function() {
+        locationModal.style.display = 'block';
+    });
+
+    closeModals.forEach(span => {
+        span.addEventListener('click', function() {
+            locationModal.style.display = 'none';
+            preferencesModal.style.display = 'none';
+        });
+    });
+
+    document.getElementById('fetch-location-name').addEventListener('click', function() {
+        const locationName = document.getElementById('location-name').value;
+        if (locationName) {
+            fetchCoordinates(locationName);
+        } else {
+            alert('Please enter a location name.');
+        }
+    });
+
+    document.getElementById('use-current-position').addEventListener('click', function() {
+        getLocation();
+        locationModal.style.display = 'none';
+    });
+
+    document.getElementById('fetch-manual-location').addEventListener('click', function() {
+        const latitude = parseFloat(document.getElementById('latitude').value);
+        const longitude = parseFloat(document.getElementById('longitude').value);
+        if (!isNaN(latitude) && !isNaN(longitude)) {
+            localStorage.setItem('latitude', latitude);
+            localStorage.setItem('longitude', longitude);
+            fetchUVData(latitude, longitude);
+            locationModal.style.display = 'none';
+        } else {
+            alert('Please enter valid latitude and longitude.');
+        }
     });
 
     document.getElementById('preferences-form').addEventListener('submit', function(event) {
         event.preventDefault();
-        const spf = document.getElementById('preferred-spf').value;
-        const darkMode = document.getElementById('theme-toggle').checked;
-        setUserPreferences({ spf, darkMode });
-        applyTheme();
+        const preferredSpf = document.getElementById('preferred-spf').value;
+        const isDarkMode = darkModeToggle.checked;
+        localStorage.setItem('preferred-spf', preferredSpf);
+        localStorage.setItem('dark-mode', isDarkMode);
+        toggleDarkMode(isDarkMode);
         preferencesModal.style.display = 'none';
     });
 
-    applyTheme();
-    loadSavedLocation();
+    loadStoredLocation(); 
 });
